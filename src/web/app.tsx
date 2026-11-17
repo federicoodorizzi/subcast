@@ -174,12 +174,12 @@ export function createApp(http: Http = publisherFetch) {
     const store = c.get("store");
     const account = await store.getAccount(Number(c.req.param("id")));
     if (!account) return notFound(c);
-    const picked = (await c.req.formData()).getAll("show").map(String).slice(0, 25);
+    const picked = (await c.req.formData()).getAll("show").map((v) => String(v).trim()).slice(0, 25);
     let failed = 0;
-    for (const value of picked) {
-      const [slug, title] = value.split("\n");
-      if (!slug || !/^[a-z0-9-]{1,100}$/.test(slug)) continue;
-      const feedId = await store.createFeed(account.id, slug, title?.slice(0, 200) || slug);
+    for (const slug of picked) {
+      if (!/^[a-z0-9-]{1,100}$/.test(slug)) continue;
+      // The first refresh, just below, replaces the slug with the show's real title.
+      const feedId = await store.createFeed(account.id, slug, slug);
       const result = await refreshFeed(store, (await store.getAccount(account.id))!, (await store.getFeed(feedId))!, http);
       if (result.error) failed++;
     }

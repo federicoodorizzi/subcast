@@ -195,7 +195,7 @@ export function ShowPicker(props: { account: AccountRow; provider: Provider; sho
           {props.shows.map((s) => (
             <li>
               <label class="check">
-                <input type="checkbox" name="show" value={`${s.slug}\n${s.title}`} checked={props.followed.has(s.slug)} disabled={props.followed.has(s.slug)} />
+                <input type="checkbox" name="show" value={s.slug} checked={props.followed.has(s.slug)} disabled={props.followed.has(s.slug)} />
                 {s.title}
               </label>
             </li>

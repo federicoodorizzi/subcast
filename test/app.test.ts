@@ -117,7 +117,7 @@ describe("from account to feed", () => {
     expect(row!.credentials_sealed).not.toContain("secret");
     expect(row!.credentials_sealed).not.toContain("me@example.test");
 
-    expect((await browser.request(showsPath, { method: "POST", form: { show: "a-voce\nA voce" } })).status).toBe(303);
+    expect((await browser.request(showsPath, { method: "POST", form: { show: "a-voce" } })).status).toBe(303);
     const [url] = await feedUrls(browser);
     expect(url).toMatch(/^https:\/\/proxy\.example\.test\/feed\/[A-Za-z0-9_-]{43}\/a-voce\.xml$/);
 
@@ -139,12 +139,25 @@ describe("from account to feed", () => {
     expect((await stranger.request("/feed/not-the-token/a-voce.xml")).status).toBe(404);
   });
 
+  it("adds every show ticked in the picker, as a browser submits it", async () => {
+    const fake = fakeInternazionale([{ id: 1, title: "Uno", access: "limited", keyed: true }]);
+    const browser = new Browser(createApp(fake.http));
+    await browser.signIn();
+    const added = await browser.request("/accounts?provider=internazionale", { method: "POST", form: { label: "Mine", cred_email: "me@example.test", cred_password: "secret" } });
+    const picker = await (await browser.request(added.headers.get("Location")!)).text();
+    const values = [...picker.matchAll(/name="show" value="([^"]*)"/g)].map((m) => m[1]!);
+    expect(values).toEqual(["a-voce", "il-mondo-cultura", "limoni"]);
+    await browser.request(added.headers.get("Location")!, { method: "POST", form: { show: values.slice(0, 2) } });
+    const feeds = await env.DB.prepare("SELECT show_slug FROM feeds ORDER BY show_slug").all<{ show_slug: string }>();
+    expect(feeds.results.map((f) => f.show_slug)).toEqual(["a-voce", "il-mondo-cultura"]);
+  });
+
   it("gives a feed a new address that replaces the old one", async () => {
     const fake = fakeInternazionale([{ id: 1, title: "Uno", access: "limited", keyed: true }]);
     const browser = new Browser(createApp(fake.http));
     await browser.signIn();
     const added = await browser.request("/accounts?provider=internazionale", { method: "POST", form: { label: "Mine", cred_email: "me@example.test", cred_password: "secret" } });
-    await browser.request(added.headers.get("Location")!, { method: "POST", form: { show: "a-voce\nA voce" } });
+    await browser.request(added.headers.get("Location")!, { method: "POST", form: { show: "a-voce" } });
     const [before] = await feedUrls(browser);
     const feedId = (await env.DB.prepare("SELECT id FROM feeds").first<{ id: number }>())!.id;
     await browser.request(`/feeds/${feedId}/rotate`, { method: "POST", form: {} });
@@ -159,7 +172,7 @@ describe("from account to feed", () => {
     const browser = new Browser(createApp(fake.http));
     await browser.signIn();
     const added = await browser.request("/accounts?provider=internazionale", { method: "POST", form: { label: "Mine", cred_email: "me@example.test", cred_password: "secret" } });
-    await browser.request(added.headers.get("Location")!, { method: "POST", form: { show: "a-voce\nA voce" } });
+    await browser.request(added.headers.get("Location")!, { method: "POST", form: { show: "a-voce" } });
     const feed = await env.DB.prepare("SELECT last_error FROM feeds").first<{ last_error: string }>();
     expect(feed!.last_error).toContain("still hid the subscriber audio");
     // It signed in again once before giving up.
