@@ -14,8 +14,9 @@ private feed address for each show. Paste that address into Apple Podcasts with 
 | Publisher | What you need | Shows |
 | --- | --- | --- |
 | [Internazionale](https://www.internazionale.it/podcast) | A digital subscription | Every show on internazionale.it/podcast, including the subscriber-only ones such as *A voce* |
+| [Il Post](https://www.ilpost.it/podcasts/) | A subscription | Every show in the Il Post app, including the subscriber-only ones such as *Morning*, *Globo* and *Tienimi Bordone* |
 
-Il Post is next. Adding a publisher is one file: see [Adding a publisher](#adding-a-publisher).
+Adding a publisher is one file: see [Adding a publisher](#adding-a-publisher).
 
 ## How it works
 
@@ -33,6 +34,12 @@ Il Post is next. Adding a publisher is one file: see [Adding a publisher](#addin
   with a feed, so this token is what keeps the feed private. Anyone who has the address can
   listen, so keep it to yourself. If it leaks, choose **New address** and the old one stops
   working at once.
+- **Artwork is served at the size podcast apps expect.** Every show and every episode carries an
+  `itunes:image` pointing at `/feed/<token>/art/...`. That route passes through a publisher's picture
+  when it's already square and at least 1400 px, and otherwise resizes it with
+  [Cloudflare Images](https://developers.cloudflare.com/images/transform-images/bindings/). Each
+  picture is resized once and then cached, well within the free plan's 5,000 resizes a month. Without
+  an episode image, Apple Podcasts falls back to the thumbnail inside the MP3.
 - Every feed is marked `<itunes:block>Yes</itunes:block>`, so it never appears in Apple's public
   directory.
 

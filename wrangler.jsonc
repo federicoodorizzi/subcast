@@ -26,6 +26,10 @@
   // Every 30 minutes the Worker checks each enabled show for new episodes.
   "triggers": { "crons": ["*/30 * * * *"] },
 
+  // Cloudflare Images, which resizes show artwork to the 1400 px podcast apps want. Free for 5,000
+  // pictures a month, and each picture is resized once and then cached.
+  "images": { "binding": "IMAGES" },
+
   // Accounts (with their encrypted credentials), feeds and episodes. Deploying creates the database
   // if the account has none of this name. The Worker creates its own tables (src/db/schema.ts).
   "d1_databases": [{ "binding": "DB", "database_name": "podcast-proxy" }]

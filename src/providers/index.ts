@@ -1,8 +1,9 @@
+import { ilpost } from "./ilpost";
 import { internazionale } from "./internazionale";
 import type { Http, Provider } from "./types";
 
 /** Every publisher the Worker knows. Add a new one here. */
-export const providers: Provider[] = [internazionale];
+export const providers: Provider[] = [internazionale, ilpost];
 
 export function getProvider(id: string): Provider | undefined {
   return providers.find((p) => p.id === id);

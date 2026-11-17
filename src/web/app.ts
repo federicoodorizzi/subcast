@@ -4,6 +4,7 @@ import type { AccountInfo, ApiError, EpisodeInfo, FeedInfo, ProviderInfo, Refres
 import { ensureSchema } from "../db/schema";
 import { Store, type AccountRow, type FeedRow } from "../db/store";
 import { missingSetup, type Env } from "../env";
+import { serveArtwork } from "../art";
 import { renderFeed } from "../feed";
 import { getProvider, providers, publisherFetch } from "../providers";
 import { CredentialsError, type Http, type Provider } from "../providers/types";
@@ -14,7 +15,8 @@ type AppEnv = { Bindings: Env; Variables: { store: Store } };
 type C = Context<AppEnv>;
 
 const THROTTLE_WINDOW_MS = 15 * 60_000;
-const SLUG = /^[a-z0-9-]{1,100}$/;
+/** A show's slug as publishers write them: lowercase letters, digits, dashes, underscores. */
+const SLUG = /^[a-z0-9_-]{1,100}$/;
 
 /**
  * The Worker's HTTP side: the feeds at /feed, and the JSON API at /api that the admin app (app/) uses.
@@ -57,7 +59,25 @@ export function createApp(http: Http = publisherFetch) {
     if (c.req.method === "HEAD") return c.body(null, 200, headers);
     const selfUrl = new URL(c.req.url);
     selfUrl.search = "";
-    return c.body(renderFeed(feed, episodes, selfUrl.toString()), 200, headers);
+    const base = `${selfUrl.origin}/feed/${c.req.param("token")}`;
+    return c.body(renderFeed(feed, episodes, selfUrl.toString(), base), 200, headers);
+  });
+
+  // A feed's artwork, behind the same token: art/show.jpg, or art/<episode guid>.jpg.
+  app.get("/feed/:token/art/:name", async (c) => {
+    const store = c.get("store");
+    const feed = await store.feedByToken(c.req.param("token"));
+    if (!feed) return c.text("Not found", 404);
+    const name = decodeURIComponent(c.req.param("name")).replace(/\.jpg$/, "");
+    const source = name === "show" ? feed.image_url : ((await store.episode(feed.id, name))?.image_url ?? feed.image_url);
+    if (!source || !/^https:\/\//.test(source)) return c.text("Not found", 404);
+    let ctx: { waitUntil(p: Promise<unknown>): void } | undefined;
+    try {
+      ctx = c.executionCtx;
+    } catch {
+      // No ExecutionContext outside a real request (tests); the cache write is awaited instead.
+    }
+    return serveArtwork(source, c.env.IMAGES, http, ctx);
   });
 
   // Every request that changes something must come from the app itself. Browsers always send Origin
@@ -157,7 +177,7 @@ export function createApp(http: Http = publisherFetch) {
     const followed = new Map((await store.listFeeds()).filter((f) => f.account_id === account.id).map((f) => [f.show_slug, f.id]));
     try {
       const shows = await provider.listShows(http);
-      return c.json<ShowChoice[]>(shows.map((s) => ({ slug: s.slug, title: s.title, imageUrl: s.imageUrl ?? null, feedId: followed.get(s.slug) ?? null })));
+      return c.json<ShowChoice[]>(shows.map((s) => ({ slug: s.slug, title: s.title, imageUrl: s.imageUrl ?? null, subscriberOnly: !!s.subscriberOnly, feedId: followed.get(s.slug) ?? null })));
     } catch (err) {
       return fail(c, 502, `Couldn't list ${provider.name}'s shows: ${errorText(err)}`);
     }

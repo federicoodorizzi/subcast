@@ -42,6 +42,7 @@ export interface EpisodeRow {
   audio_type: string;
   link: string | null;
   first_seen_at: number;
+  image_url: string | null;
 }
 
 const credentialsBinding = (id: number) => `account:${id}:credentials`;
@@ -186,13 +187,13 @@ export class Store {
         // An episode's details may be corrected after it's out, so they're updated, but first_seen_at stays.
         this.db
           .prepare(
-            `INSERT INTO episodes (feed_id, guid, title, description_html, published_at, duration_seconds, audio_url, audio_type, link, first_seen_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `INSERT INTO episodes (feed_id, guid, title, description_html, published_at, duration_seconds, audio_url, audio_type, link, image_url, first_seen_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              ON CONFLICT (feed_id, guid) DO UPDATE SET title = excluded.title, description_html = excluded.description_html,
                published_at = excluded.published_at, duration_seconds = excluded.duration_seconds, audio_url = excluded.audio_url,
-               audio_type = excluded.audio_type, link = excluded.link`,
+               audio_type = excluded.audio_type, link = excluded.link, image_url = excluded.image_url`,
           )
-          .bind(feedId, e.guid, e.title, e.descriptionHtml, e.publishedAt, e.durationSeconds, e.audioUrl, e.audioType, e.link, now),
+          .bind(feedId, e.guid, e.title, e.descriptionHtml, e.publishedAt, e.durationSeconds, e.audioUrl, e.audioType, e.link, e.imageUrl, now),
       ),
     ];
     const before = await this.db.prepare("SELECT COUNT(*) AS n FROM episodes WHERE feed_id = ?").bind(feedId).first<{ n: number }>();
@@ -206,6 +207,10 @@ export class Store {
   }
 
   /** Per feed: how many episodes it holds, and when the newest came out. */
+  episode(feedId: number, guid: string): Promise<EpisodeRow | null> {
+    return this.db.prepare("SELECT * FROM episodes WHERE feed_id = ? AND guid = ?").bind(feedId, guid).first<EpisodeRow>();
+  }
+
   async episodeStats(): Promise<Map<number, { count: number; latest: number | null }>> {
     const rows = await this.all<{ feed_id: number; n: number; latest: number | null }>("SELECT feed_id, COUNT(*) AS n, MAX(published_at) AS latest FROM episodes GROUP BY feed_id");
     return new Map(rows.map((r) => [r.feed_id, { count: r.n, latest: r.latest }]));

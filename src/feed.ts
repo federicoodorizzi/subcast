@@ -2,10 +2,16 @@ import type { EpisodeRow, FeedRow } from "./db/store";
 import { cdata, decodeHtmlEntities, escapeXml, stripTags } from "./html";
 
 /** RSS 2.0 with Apple's podcast tags. `itunes:block` keeps the feed out of Apple's public directory. */
-export function renderFeed(feed: FeedRow, episodes: EpisodeRow[], selfUrl: string): string {
+/** Where a feed's pictures are served: /feed/<token>/art/show.jpg, and art/<guid>.jpg for an episode's own. */
+export function artUrl(feedBase: string, guid?: string): string {
+  return `${feedBase}/art/${guid ? encodeURIComponent(guid) : "show"}.jpg`;
+}
+
+export function renderFeed(feed: FeedRow, episodes: EpisodeRow[], selfUrl: string, feedBase: string): string {
   const description = feed.description_html || feed.title;
   const lastBuild = episodes[0]?.published_at ?? feed.last_refreshed_at ?? feed.created_at;
-  const items = episodes.map((e) => renderItem(e, feed)).join("");
+  const showArt = feed.image_url ? artUrl(feedBase) : null;
+  const items = episodes.map((e) => renderItem(e, feed, e.image_url ? artUrl(feedBase, e.guid) : showArt)).join("");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
@@ -20,12 +26,12 @@ export function renderFeed(feed: FeedRow, episodes: EpisodeRow[], selfUrl: strin
 <itunes:explicit>false</itunes:explicit>
 <itunes:type>episodic</itunes:type>
 <itunes:block>Yes</itunes:block>
-${feed.image_url ? `<itunes:image href="${escapeXml(feed.image_url)}"/>\n<image><url>${escapeXml(feed.image_url)}</url><title>${escapeXml(feed.title)}</title><link>${escapeXml(feed.link || selfUrl)}</link></image>\n` : ""}${items}</channel>
+${showArt ? `<itunes:image href="${escapeXml(showArt)}"/>\n<image><url>${escapeXml(showArt)}</url><title>${escapeXml(feed.title)}</title><link>${escapeXml(feed.link || selfUrl)}</link></image>\n` : ""}${items}</channel>
 </rss>
 `;
 }
 
-function renderItem(e: EpisodeRow, feed: FeedRow): string {
+function renderItem(e: EpisodeRow, feed: FeedRow, art: string | null): string {
   return `<item>
 <title>${escapeXml(e.title)}</title>
 <guid isPermaLink="false">${escapeXml(e.guid)}</guid>
@@ -35,7 +41,7 @@ ${e.link ? `<link>${escapeXml(e.link)}</link>\n` : ""}<description>${cdata(e.des
 <itunes:summary>${escapeXml(plain(e.description_html))}</itunes:summary>
 <enclosure url="${escapeXml(e.audio_url)}" length="0" type="${escapeXml(e.audio_type)}"/>
 ${e.duration_seconds ? `<itunes:duration>${e.duration_seconds}</itunes:duration>\n` : ""}<itunes:author>${escapeXml(feed.author)}</itunes:author>
-<itunes:episodeType>full</itunes:episodeType>
+${art ? `<itunes:image href="${escapeXml(art)}"/>\n` : ""}<itunes:episodeType>full</itunes:episodeType>
 <itunes:explicit>false</itunes:explicit>
 </item>
 `;

@@ -52,6 +52,7 @@ const MIGRATIONS: string[][] = [
       window_start INTEGER NOT NULL
     )`,
   ],
+  [`ALTER TABLE episodes ADD COLUMN image_url TEXT`],
 ];
 
 let ready: Promise<void> | null = null;

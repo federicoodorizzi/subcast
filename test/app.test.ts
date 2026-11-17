@@ -6,6 +6,8 @@ import { createApp } from "../src/web/app";
 import { fakeJwt, podcastIndex, showPage, type FakeEpisode } from "./fixtures";
 
 const ORIGIN = "https://proxy.example.test";
+/** A 1×1 PNG, standing in for a show's artwork. */
+const PNG = Uint8Array.from(atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="), (ch) => ch.charCodeAt(0));
 const PASSWORD = env.ADMIN_PASSWORD;
 const LOGIN = { provider: "internazionale", label: "Mine", credentials: { email: "me@example.test", password: "secret" } };
 
@@ -22,6 +24,7 @@ function fakeInternazionale(episodes: FakeEpisode[]) {
         : Response.json({ response: "ko", info: { message: "login failed" } }, { status: 401 });
     }
     if (url === "https://www.internazionale.it/podcast") return new Response(podcastIndex);
+    if (url === "https://media.example.test/show-hd.jpg") return new Response(PNG, { headers: { "Content-Type": "image/png" } });
     if (url.startsWith("https://www.internazionale.it/podcast/")) {
       const signedIn = new Headers(init?.headers).get("Cookie") === `internaz_auth_tkn=${token}`;
       return new Response(showPage("A voce", episodes.map((e) => ({ ...e, keyed: e.keyed && signedIn }))));
@@ -154,6 +157,15 @@ describe("from account to feed", () => {
     expect(xml).toContain('<guid isPermaLink="false">spreaker:2</guid>');
     expect(xml.indexOf("spreaker:2")).toBeLessThan(xml.indexOf("spreaker:1"));
     expect(xml).toContain("]]]]><![CDATA[>");
+
+    // Every episode carries artwork, served behind the feed's own token.
+    const base = feed.url.replace(/\/a-voce\.xml$/, "");
+    expect(xml).toContain(`<itunes:image href="${base}/art/show.jpg"/>`);
+    expect(xml.match(/<itunes:image /g)).toHaveLength(3);
+    const art = await stranger.request(new URL(`${base}/art/show.jpg`).pathname);
+    expect(art.status).toBe(200);
+    expect(art.headers.get("Content-Type")).toMatch(/^image\//);
+    expect((await stranger.request("/feed/not-the-token/art/show.jpg")).status).toBe(404);
 
     expect((await stranger.request(new URL(feed.url).pathname, { headers: { "If-None-Match": res.headers.get("ETag")! } })).status).toBe(304);
     expect((await stranger.request("/feed/not-the-token/a-voce.xml")).status).toBe(404);

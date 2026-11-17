@@ -19,6 +19,8 @@ export interface ShowSummary {
   slug: string;
   title: string;
   imageUrl?: string;
+  /** True when only subscribers can listen, where the publisher says so. */
+  subscriberOnly?: boolean;
 }
 
 export interface Episode {
@@ -32,6 +34,8 @@ export interface Episode {
   audioUrl: string;
   audioType: string;
   link: string | null;
+  /** The episode's own artwork, when it has one unlike the show's. */
+  imageUrl: string | null;
 }
 
 export interface Show {

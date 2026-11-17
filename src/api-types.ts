@@ -55,6 +55,8 @@ export interface ShowChoice {
   slug: string;
   title: string;
   imageUrl: string | null;
+  /** True when the publisher marks the show as for subscribers only. */
+  subscriberOnly: boolean;
   feedId: number | null;
 }
 

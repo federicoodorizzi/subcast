@@ -1,5 +1,7 @@
 export interface Env {
   DB: D1Database;
+  /** Cloudflare Images, which resizes artwork to the 1400 px podcast apps want (src/art.ts). */
+  IMAGES?: ImagesBinding;
   /** The password the admin pages ask for. Set by the Deploy to Cloudflare form, or `wrangler secret put`. */
   ADMIN_PASSWORD?: string;
   /**

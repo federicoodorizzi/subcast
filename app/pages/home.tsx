@@ -33,6 +33,9 @@ export function HomeScreen({ onSignedOut }: { onSignedOut: () => void }) {
   const accounts = state?.accounts ?? [];
   const feeds = state?.feeds ?? [];
   const openFeed = feeds.find((f) => f.id === openId) ?? null;
+  // With more than one publisher, each row says whose show it is.
+  const providerNames = new Map(accounts.map((a) => [a.id, state?.providers.find((p) => p.id === a.provider)?.name ?? a.provider]));
+  if (new Set(providerNames.values()).size < 2) providerNames.clear();
   const needsAttention = feeds.filter((f) => f.lastError).length + accounts.filter((a) => a.lastError).length;
 
   const addShows = () => {
@@ -141,7 +144,7 @@ export function HomeScreen({ onSignedOut }: { onSignedOut: () => void }) {
           )}
           <ul className="flex flex-col gap-2">
             {feeds.map((f) => (
-              <FeedRow key={f.id} feed={f} onOpen={() => open(f.id)} />
+              <FeedRow key={f.id} feed={f} onOpen={() => open(f.id)} publisher={providerNames.size > 1 ? providerNames.get(f.accountId) : undefined} />
             ))}
           </ul>
           <p className="mt-6 px-1 text-center text-xs text-muted-foreground">
@@ -154,7 +157,7 @@ export function HomeScreen({ onSignedOut }: { onSignedOut: () => void }) {
   );
 }
 
-function FeedRow({ feed, onOpen }: { feed: FeedInfo; onOpen: () => void }) {
+function FeedRow({ feed, onOpen, publisher }: { feed: FeedInfo; onOpen: () => void; publisher?: string }) {
   return (
     <li className={cn("group relative flex items-center gap-3 rounded-xl border bg-card p-2.5 pr-2 transition-colors hover:bg-muted/50", !feed.enabled && "opacity-60")}>
       <button type="button" onClick={onOpen} className="absolute inset-0 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50" aria-label={`Open ${feed.title}`} />
@@ -169,6 +172,7 @@ function FeedRow({ feed, onOpen }: { feed: FeedInfo; onOpen: () => void }) {
             <span className="text-destructive">Couldn't check · tap for details</span>
           ) : feed.latestEpisodeAt ? (
             <>
+              {publisher && `${publisher} · `}
               {plural(feed.episodes, "episode")} · latest {timeAgo(feed.latestEpisodeAt)}
             </>
           ) : (

@@ -117,6 +117,7 @@ export function parseShowPage(html: string, link: string): Show {
       audioUrl: url,
       audioType: "audio/mpeg",
       link: e.slug ? `${link}/${e.slug}` : link,
+      imageUrl: null,
     });
   }
   if (locked > 0) throw new SessionExpiredError(`${locked} subscriber episode(s) came back without their audio`);

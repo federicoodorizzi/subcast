@@ -198,7 +198,14 @@ function ShowRow(props: { show: ShowChoice; checked: boolean; onChange: (on: boo
       >
         <Artwork src={show.imageUrl} className="size-11" />
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium">{show.title}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="truncate font-medium">{show.title}</span>
+            {show.subscriberOnly && (
+              <Badge variant="secondary" className="shrink-0">
+                Subscribers
+              </Badge>
+            )}
+          </span>
           {error && <span className="block truncate text-xs text-destructive">{error}</span>}
         </span>
         {status === "adding" ? (
