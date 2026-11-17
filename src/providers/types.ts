@@ -54,6 +54,8 @@ export interface Provider {
   id: string;
   name: string;
   homepage: string;
+  /** The publisher's own square icon, on its own site: shown, never copied into this repo. */
+  iconUrl?: string;
   credentialFields: CredentialField[];
   /** Signs in. Throws CredentialsError when the publisher turns the credentials (or the account) down. */
   login(credentials: Record<string, string>, http: Http): Promise<ProviderSession>;

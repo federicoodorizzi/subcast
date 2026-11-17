@@ -13,7 +13,8 @@
     "deploy": "node scripts/deploy.ts",
     "typecheck": "tsc -p tsconfig.worker.json && tsc -p tsconfig.app.json",
     "test": "vitest run",
-    "check": "pnpm typecheck && vitest run && vite build"
+    "check": "pnpm typecheck && vitest run && vite build",
+    "screenshots": "node scripts/screenshots.ts"
   },
   "cloudflare": {
     "bindings": {
@@ -48,6 +49,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
+    "playwright-core": "1.65.1",
     "tailwindcss": "^4.3.5",
     "typescript": "5.9.3",
     "vite": "^8.3.8",

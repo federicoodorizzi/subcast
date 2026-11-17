@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { FeedInfo } from "../../src/api-types";
 import { Artwork, CopyButton, Screen } from "@/components/shell";
 import { FeedSheet } from "@/components/feed-sheet";
+import { ProviderIcon } from "@/components/provider-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -118,8 +119,11 @@ export function HomeScreen({ onSignedOut }: { onSignedOut: () => void }) {
             ) : (
               <div className="flex flex-wrap justify-center gap-2">
                 {state.providers.map((p) => (
-                  <Button key={p.id} size="lg" className="h-11" asChild>
-                    <Link href={`/accounts/new/${p.id}`}>Connect {p.name}</Link>
+                  <Button key={p.id} variant="outline" size="lg" className="h-11 gap-2 pl-1.5" asChild>
+                    <Link href={`/accounts/new/${p.id}`}>
+                      <ProviderIcon provider={p} className="size-8 rounded-md" />
+                      Connect {p.name}
+                    </Link>
                   </Button>
                 ))}
               </div>

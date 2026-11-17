@@ -16,6 +16,13 @@ with your subscription, checks for new episodes every 30 minutes, and gives you 
 address for each show. Add that address to Apple Podcasts, Overcast or any other podcast app.
 It runs on your own Cloudflare account, usually on the free plan.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/screens-dark.png">
+  <img src="docs/screenshots/screens-light.png" alt="Subcast on a phone: your shows, a show's sheet with Open in Apple Podcasts and its latest episodes, the show picker with two shows ticked, and the connected accounts">
+</picture>
+
+<p align="center"><sub>The publishers, shows and artwork in these screenshots are made up: <code>pnpm screenshots</code> draws them.</sub></p>
+
 ## Supported publishers
 
 | Publisher | What you need | Shows |
@@ -135,6 +142,9 @@ The repo holds two halves, built together by Vite with the Cloudflare plugin:
 - `app/`: the admin app, written in React with [shadcn/ui](https://ui.shadcn.com) components. Vite
   builds it into static files that the Worker serves. Add a component with
   `pnpm dlx shadcn@latest add <name>`.
+
+`pnpm screenshots` retakes the README's pictures. It runs the app against made-up demo data
+([`scripts/screenshots.ts`](scripts/screenshots.ts)) in the Google Chrome installed on your machine.
 
 The tests run inside workerd with a local D1, and use a made-up publisher
 ([`test/fixtures.ts`](test/fixtures.ts)), so they need no account and never contact a real site.

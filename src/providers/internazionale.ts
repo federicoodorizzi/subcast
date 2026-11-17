@@ -34,6 +34,7 @@ export const internazionale: Provider = {
   id: "internazionale",
   name: "Internazionale",
   homepage: SITE,
+  iconUrl: "https://static.internazionale.it/assets/img/apple-icon-144x144-precomposed.png",
   credentialFields: [
     { name: "email", label: "Email", type: "email", autocomplete: "username" },
     { name: "password", label: "Password", type: "password", autocomplete: "current-password" },

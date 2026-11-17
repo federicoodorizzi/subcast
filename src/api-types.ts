@@ -17,6 +17,7 @@ export interface ProviderInfo {
   id: string;
   name: string;
   homepage: string;
+  iconUrl: string | null;
   credentialFields: CredentialFieldInfo[];
 }
 

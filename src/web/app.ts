@@ -276,7 +276,7 @@ function errorText(err: unknown): string {
 }
 
 function providerInfo(p: Provider): ProviderInfo {
-  return { id: p.id, name: p.name, homepage: p.homepage, credentialFields: p.credentialFields };
+  return { id: p.id, name: p.name, homepage: p.homepage, iconUrl: p.iconUrl ?? null, credentialFields: p.credentialFields };
 }
 
 function accountInfo(a: AccountRow): AccountInfo {

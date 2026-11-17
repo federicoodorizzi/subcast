@@ -52,6 +52,7 @@ export const ilpost: Provider = {
   id: "ilpost",
   name: "Il Post",
   homepage: SITE,
+  iconUrl: "https://static-prod.cdnilpost.com/wp-content/uploads/favicon/apple-touch-icon-180x180.png",
   credentialFields: [
     { name: "email", label: "Email", type: "email", autocomplete: "username" },
     { name: "password", label: "Password", type: "password", autocomplete: "current-password" },

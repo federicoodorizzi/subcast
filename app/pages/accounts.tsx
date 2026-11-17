@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CircleAlertIcon, EllipsisVerticalIcon, EyeIcon, EyeOffIcon, LockIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 import type { ProviderInfo } from "../../src/api-types";
+import { ProviderIcon } from "@/components/provider-icon";
 import { Screen, SectionTitle } from "@/components/shell";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -47,7 +48,7 @@ export function AccountsScreen() {
                   const feeds = state.feeds.filter((f) => f.accountId === a.id).length;
                   return (
                     <li key={a.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
-                      <ProviderMark name={provider?.name ?? a.provider} />
+                      <ProviderIcon provider={provider} name={a.provider} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">{a.label}</p>
                         <p className="truncate text-sm text-muted-foreground">
@@ -85,7 +86,7 @@ export function AccountsScreen() {
             {state.providers.map((p) => (
               <li key={p.id}>
                 <Link href={`/accounts/new/${p.id}`} className="flex min-h-16 items-center gap-3 rounded-xl border border-dashed p-3 transition-colors hover:bg-muted/50 active:bg-muted">
-                  <ProviderMark name={p.name} />
+                  <ProviderIcon provider={p} />
                   <span className="flex-1 font-medium">{p.name}</span>
                   <PlusIcon className="size-4 text-muted-foreground" />
                 </Link>
@@ -128,14 +129,6 @@ export function AccountsScreen() {
         </AlertDialogContent>
       </AlertDialog>
     </Screen>
-  );
-}
-
-function ProviderMark({ name }: { name: string }) {
-  return (
-    <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold text-muted-foreground" aria-hidden>
-      {name.slice(0, 1)}
-    </span>
   );
 }
 
@@ -187,6 +180,7 @@ export function AccountFormScreen({ providerId, accountId }: { providerId?: stri
   return (
     <Screen title={account ? "Update sign-in" : `Connect ${provider.name}`} back="/accounts">
       <form onSubmit={submit} className="mx-auto max-w-md">
+        <ProviderIcon provider={provider} className="mb-4 size-14 rounded-xl" />
         <p className="mb-5 text-sm text-muted-foreground">
           {account
             ? `Enter your ${provider.name} sign-in again. It's checked before it's saved.`
