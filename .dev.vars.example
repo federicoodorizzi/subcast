@@ -1,0 +1,7 @@
+# Copy to .dev.vars for `pnpm dev`. Deploy to Cloudflare asks for each line that isn't commented.
+# The password the admin pages ask for. Make up a long one.
+ADMIN_PASSWORD=
+# 32 random bytes as hex, from which the Worker derives the key that encrypts your publisher
+# credentials. `pnpm run deploy` makes one on the first deploy; for `pnpm dev`, run
+# `openssl rand -hex 32` and paste it here.
+# APP_SECRET=

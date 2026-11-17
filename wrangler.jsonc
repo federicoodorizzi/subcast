@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Kept at the root so Deploy to Cloudflare finds it: the button renames the Worker and the
+  // database here for each deployer.
+  "name": "podcast-proxy",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Feed addresses carry their secret token in the path, and invocation logs record every request's
+  // URL, so they stay off. What the Worker logs itself (console.*) never includes a token.
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } },
+
+  // The Worker answers at its workers.dev address until you give it a custom domain in the
+  // dashboard (Settings → Domains & Routes).
+  "workers_dev": true,
+  "preview_urls": false,
+
+  // Every 30 minutes the Worker checks each enabled show for new episodes.
+  "triggers": { "crons": ["*/30 * * * *"] },
+
+  // Accounts (with their encrypted credentials), feeds and episodes. Deploying creates the database
+  // if the account has none of this name. The Worker creates its own tables (src/db/schema.ts).
+  "d1_databases": [{ "binding": "DB", "database_name": "podcast-proxy" }]
+}
