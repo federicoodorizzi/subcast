@@ -17,6 +17,8 @@ type C = Context<AppEnv>;
 const THROTTLE_WINDOW_MS = 15 * 60_000;
 /** A show's slug as publishers write them: lowercase letters, digits, dashes, underscores. */
 const SLUG = /^[a-z0-9_-]{1,100}$/;
+/** Where plain http is fine: `pnpm dev` and tests on this machine. */
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 /**
  * The Worker's HTTP side: the feeds at /feed, and the JSON API at /api that the admin app (app/) uses.
@@ -25,8 +27,17 @@ const SLUG = /^[a-z0-9_-]{1,100}$/;
 export function createApp(http: Http = publisherFetch) {
   const app = new Hono<AppEnv>();
 
+  // Only https outside this machine: over plain http the password, the session cookie and the feed
+  // tokens would cross the network readable. Cloudflare answers http too unless the zone redirects.
   app.use(async (c, next) => {
+    const url = new URL(c.req.url);
+    if (url.protocol === "http:" && !LOCAL_HOSTS.has(url.hostname)) {
+      if (c.req.method !== "GET" && c.req.method !== "HEAD") return fail(c, 403, "Use https");
+      url.protocol = "https:";
+      return c.redirect(url.toString(), 301);
+    }
     await next();
+    if (url.protocol === "https:") c.header("Strict-Transport-Security", "max-age=31536000");
     c.header("X-Content-Type-Options", "nosniff");
     c.header("Referrer-Policy", "no-referrer");
     if (c.req.path.startsWith("/api/")) c.header("Cache-Control", "no-store");

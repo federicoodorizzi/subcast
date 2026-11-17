@@ -105,6 +105,31 @@ describe("session", () => {
   });
 });
 
+describe("https", () => {
+  const app = createApp();
+  const send = (url: string, init?: RequestInit) => app.fetch(new Request(url, { redirect: "manual", ...init }), env);
+
+  it("sends plain http to https, and won't take a password over it", async () => {
+    const get = await send("http://proxy.example.test/feed/abc/show.xml?x=1");
+    expect(get.status).toBe(301);
+    expect(get.headers.get("Location")).toBe("https://proxy.example.test/feed/abc/show.xml?x=1");
+    const post = await send("http://proxy.example.test/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: "http://proxy.example.test" },
+      body: JSON.stringify({ password: PASSWORD }),
+    });
+    expect(post.status).toBe(403);
+    expect(post.headers.get("Set-Cookie")).toBeNull();
+  });
+
+  it("tells browsers to stay on https, and leaves local http alone", async () => {
+    expect((await send(`${ORIGIN}/healthz`)).headers.get("Strict-Transport-Security")).toBe("max-age=31536000");
+    const local = await send("http://localhost:5173/healthz");
+    expect(local.status).toBe(200);
+    expect(local.headers.get("Strict-Transport-Security")).toBeNull();
+  });
+});
+
 describe("from account to feed", () => {
   it("signs in to the publisher, makes feeds, and serves each only at its secret address", async () => {
     const fake = fakeInternazionale([
