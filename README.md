@@ -25,6 +25,9 @@ Il Post is next. Adding a publisher is one file: see [Adding a publisher](#addin
 - **Every 30 minutes**, a Cron Trigger signs in to each account (only when its session is about to
   expire), fetches each show you follow, and saves new episodes to a D1 database. Episodes stay in
   the feed even after the publisher's page stops listing them.
+- **Each show gets its own feed.** Podcast apps treat one feed as one show, with its own artwork,
+  episode list, notifications and settings. A single feed per publisher would mix every show into
+  one. On a phone, tap a show and then **Open in Apple Podcasts**, so following a show takes one tap.
 - **Each feed address holds a 256-bit secret token**, as in
   `https://podcasts.example.com/feed/<token>/a-voce.xml`. Apple Podcasts can't send a password
   with a feed, so this token is what keeps the feed private. Anyone who has the address can
@@ -92,9 +95,16 @@ whichever address you use to open the admin pages.
 ```sh
 pnpm install
 cp .dev.vars.example .dev.vars   # then fill in ADMIN_PASSWORD and APP_SECRET (openssl rand -hex 32)
-pnpm dev                         # http://localhost:8787
-pnpm check                       # typecheck, tests, and a dry-run build
+pnpm dev                         # the app and the Worker together, http://localhost:5173
+pnpm check                       # typecheck, tests, and a build
 ```
+
+The repo holds two halves, built together by Vite with the Cloudflare plugin:
+
+- `src/`: the Worker. It serves the feeds at `/feed`, a JSON API at `/api`, and the cron job.
+- `app/`: the admin app, written in React with [shadcn/ui](https://ui.shadcn.com) components. Vite
+  builds it into static files that the Worker serves. Add a component with
+  `pnpm dlx shadcn@latest add <name>`.
 
 The tests run inside workerd with a local D1, and use a made-up publisher
 ([`test/fixtures.ts`](test/fixtures.ts)), so they need no account and never contact a real site.

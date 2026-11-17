@@ -38,7 +38,7 @@ describe("parseShowPage", () => {
 describe("parseShowList", () => {
   it("keeps each show once, by its name", () => {
     expect(parseShowList(podcastIndex)).toEqual([
-      { slug: "a-voce", title: "A voce" },
+      { slug: "a-voce", title: "A voce", imageUrl: "https://media.example.test/a-voce-ld.jpg" },
       { slug: "il-mondo-cultura", title: "Il Mondo cultura" },
       { slug: "limoni", title: "limoni" },
     ]);

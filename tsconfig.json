@@ -1,20 +1,8 @@
 {
+  "files": [],
+  "references": [{ "path": "./tsconfig.worker.json" }, { "path": "./tsconfig.app.json" }],
   "compilerOptions": {
-    "target": "es2024",
-    "lib": ["es2024"],
-    "module": "es2022",
-    "moduleResolution": "bundler",
-    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-plugin/types", "node"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": false
-  },
-  "include": ["src", "test", "scripts", "vitest.config.ts"]
+    "baseUrl": ".",
+    "paths": { "@/*": ["./app/*"] }
+  }
 }

@@ -36,7 +36,7 @@ export function showPage(title: string, episodes: FakeEpisode[]): string {
 }
 
 export const podcastIndex = `<!doctype html><html><body>
-<a href="/podcast/a-voce"><picture><img src="x.jpg" alt="podcast image" /></picture></a>
+<a href="/podcast/a-voce"><picture><img src="https://media.example.test/a-voce-ld.jpg" alt="podcast image" /></picture></a>
 <a href="/podcast/a-voce">A voce</a>
 <a href="https://www.internazionale.it/podcast/il-mondo-cultura">Il Mondo cultura</a>
 <a href="/podcast/limoni"><img src="y.jpg" alt=""></a>

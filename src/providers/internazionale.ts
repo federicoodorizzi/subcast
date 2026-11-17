@@ -73,14 +73,18 @@ export const internazionale: Provider = {
 };
 
 export function parseShowList(html: string): ShowSummary[] {
-  const shows = new Map<string, string>();
+  // Each show is linked twice, from its picture and from its name: keep both.
+  const shows = new Map<string, ShowSummary>();
   for (const m of html.matchAll(/<a\s[^>]*href="(?:https:\/\/www\.internazionale\.it)?\/podcast\/([a-z0-9-]+)\/?"[^>]*>([\s\S]*?)<\/a>/g)) {
     const slug = m[1]!;
-    // Each show is linked twice, from its picture and from its name: keep the name.
+    const show = shows.get(slug) ?? { slug, title: "" };
     const title = decodeHtmlEntities(stripTags(m[2]!)).trim();
-    if (title || !shows.has(slug)) shows.set(slug, title || shows.get(slug) || "");
+    const image = m[2]!.match(/<img\s[^>]*src="(https:\/\/[^"]+)"/)?.[1];
+    if (title && !show.title) show.title = title;
+    if (image && !show.imageUrl) show.imageUrl = decodeHtmlEntities(image);
+    shows.set(slug, show);
   }
-  return [...shows].map(([slug, title]) => ({ slug, title: title || slug })).sort((a, b) => a.title.localeCompare(b.title, "it"));
+  return [...shows.values()].map((s) => ({ ...s, title: s.title || s.slug })).sort((a, b) => a.title.localeCompare(b.title, "it"));
 }
 
 export function parseShowPage(html: string, link: string): Show {

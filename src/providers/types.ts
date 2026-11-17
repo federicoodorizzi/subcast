@@ -18,6 +18,7 @@ export interface ProviderSession {
 export interface ShowSummary {
   slug: string;
   title: string;
+  imageUrl?: string;
 }
 
 export interface Episode {

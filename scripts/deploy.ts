@@ -1,5 +1,5 @@
 // Deploys the Worker with the secrets it doesn't have yet, so a new deployment works with no manual step.
-// Deploy to Cloudflare's Workers Builds runs this as `pnpm run deploy`, and so can you after
+// Deploy to Cloudflare's Workers Builds runs this as `pnpm run deploy`; it builds first, then deploys, and so can you after
 // `pnpm exec wrangler login`. Extra arguments go on to `wrangler deploy`.
 //
 // - APP_SECRET: made here on the first deploy (32 random bytes), and kept by every later one, since a
@@ -37,6 +37,11 @@ function secretNames(): string[] {
   if (/not found|does not exist|10007/i.test(listed.stdout + listed.stderr)) return [];
   throw new Error(`Couldn't list the Worker's secrets:\n${listed.stdout}${listed.stderr}`);
 }
+
+// Build the admin app and the Worker first. Vite writes the Worker's deploy config to
+// .wrangler/deploy/config.json, which `wrangler deploy` then picks up on its own.
+const build = spawnSync("pnpm", ["exec", "vite", "build"], { stdio: "inherit" });
+if (build.status !== 0) process.exit(build.status ?? 1);
 
 const names = secretNames();
 const secrets: Record<string, string> = {};

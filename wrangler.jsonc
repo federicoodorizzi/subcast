@@ -16,6 +16,13 @@
   "workers_dev": true,
   "preview_urls": false,
 
+  // The admin app (app/, built by Vite into static files). The Worker answers /api, /feed and
+  // /healthz itself; every other address is the app, which routes in the browser.
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/feed/*", "/healthz"]
+  },
+
   // Every 30 minutes the Worker checks each enabled show for new episodes.
   "triggers": { "crons": ["*/30 * * * *"] },
 

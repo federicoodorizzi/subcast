@@ -106,6 +106,10 @@ export class Store {
       .run();
   }
 
+  async setAccountLabel(id: number, label: string): Promise<void> {
+    await this.db.prepare("UPDATE accounts SET label = ? WHERE id = ?").bind(label, id).run();
+  }
+
   async setAccountError(id: number, error: string | null): Promise<void> {
     await this.db.prepare("UPDATE accounts SET last_error = ? WHERE id = ?").bind(error, id).run();
   }
@@ -201,9 +205,10 @@ export class Store {
     return this.db.prepare("SELECT * FROM episodes WHERE feed_id = ? ORDER BY published_at DESC LIMIT ?").bind(feedId, limit).all<EpisodeRow>().then((r) => r.results);
   }
 
-  async episodeCounts(): Promise<Map<number, number>> {
-    const rows = await this.all<{ feed_id: number; n: number }>("SELECT feed_id, COUNT(*) AS n FROM episodes GROUP BY feed_id");
-    return new Map(rows.map((r) => [r.feed_id, r.n]));
+  /** Per feed: how many episodes it holds, and when the newest came out. */
+  async episodeStats(): Promise<Map<number, { count: number; latest: number | null }>> {
+    const rows = await this.all<{ feed_id: number; n: number; latest: number | null }>("SELECT feed_id, COUNT(*) AS n, MAX(published_at) AS latest FROM episodes GROUP BY feed_id");
+    return new Map(rows.map((r) => [r.feed_id, { count: r.n, latest: r.latest }]));
   }
 
   // Sign-in throttling for the admin pages
