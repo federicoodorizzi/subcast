@@ -6,8 +6,8 @@ import type { Env } from "../env";
 // The admin signs in with ADMIN_PASSWORD and gets a cookie signed with a key derived from APP_SECRET.
 // The signature covers a fingerprint of the password, so changing ADMIN_PASSWORD signs everyone out.
 
-const COOKIE = "__Host-pp_session";
-const LOCAL_COOKIE = "pp_session";
+const COOKIE = "__Host-subcast_session";
+const LOCAL_COOKIE = "subcast_session";
 const SESSION_MS = 30 * 86_400_000;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

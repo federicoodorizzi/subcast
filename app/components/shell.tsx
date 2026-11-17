@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Logo } from "@/components/logo";
 import { Link } from "@/lib/router";
 import { useMediaQuery } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -19,10 +20,8 @@ export function Screen(props: { title: ReactNode; back?: string; actions?: React
               <Link href={props.back}>‹ Back</Link>
             </Button>
           ) : (
-            <Link href="/" className="-ml-1 flex items-center gap-2 font-semibold tracking-tight">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <PodcastIcon className="size-4" />
-              </span>
+            <Link href="/" className="-ml-1 flex items-center gap-2 font-semibold tracking-tight" aria-label="Subcast">
+              <Logo />
             </Link>
           )}
           <h1 className="min-w-0 flex-1 truncate text-base font-semibold tracking-tight">{props.title}</h1>

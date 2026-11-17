@@ -34,6 +34,8 @@ function deriveKey(appSecret: string, purpose: Purpose): Promise<CryptoKey> {
   if (!key) {
     key = (async () => {
       const ikm = await crypto.subtle.importKey("raw", hexToBytes(appSecret), "HKDF", false, ["deriveKey"]);
+      // The project's old name stays in the derivation label: changing it would make every stored
+      // credential and feed address unreadable.
       const params = { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(32), info: enc.encode(`podcast-proxy/${purpose}/v1`) };
       return purpose === "credentials"
         ? crypto.subtle.deriveKey(params, ikm, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"])

@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   // Kept at the root so Deploy to Cloudflare finds it: the button renames the Worker and the
-  // database here for each deployer.
-  "name": "podcast-proxy",
+  // database here for each deployer. For your own deployment, put overrides in wrangler.local.json.
+  "name": "subcast",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -32,5 +32,5 @@
 
   // Accounts (with their encrypted credentials), feeds and episodes. Deploying creates the database
   // if the account has none of this name. The Worker creates its own tables (src/db/schema.ts).
-  "d1_databases": [{ "binding": "DB", "database_name": "podcast-proxy" }]
+  "d1_databases": [{ "binding": "DB", "database_name": "subcast" }]
 }

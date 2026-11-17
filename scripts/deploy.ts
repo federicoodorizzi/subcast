@@ -13,9 +13,9 @@
 
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 const passthrough = process.argv.slice(2);
 
@@ -23,9 +23,23 @@ function wrangler(args: string[], capture: boolean) {
   return spawnSync("pnpm", ["exec", "wrangler", ...args], { encoding: "utf8", stdio: capture ? ["ignore", "pipe", "pipe"] : "inherit" });
 }
 
+/**
+ * The Worker this deploy goes to: a --name given on the command line, or else the name in the config
+ * Vite built (wrangler.jsonc with wrangler.local.json over it), which wrangler deploy will use too.
+ * Getting this right matters: listing another Worker's secrets would make this one a new APP_SECRET.
+ */
+function workerName(): string {
+  const given = passthrough[passthrough.indexOf("--name") + 1];
+  if (passthrough.includes("--name") && given) return given;
+  const redirect = JSON.parse(readFileSync(".wrangler/deploy/config.json", "utf8")) as { configPath: string };
+  const built = JSON.parse(readFileSync(resolve(".wrangler/deploy", redirect.configPath), "utf8")) as { name?: string };
+  if (!built.name) throw new Error("The built Worker config has no name");
+  return built.name;
+}
+
 /** The names of the Worker's secrets, or none when the Worker doesn't exist yet. */
-function secretNames(): string[] {
-  const target = passthrough.flatMap((a, i, all) => (a === "--name" || a === "--config" || a === "-c" ? [a, all[i + 1]!] : []));
+function secretNames(name: string): string[] {
+  const target = ["--name", name];
   const listed = wrangler(["secret", "list", "--format", "json", ...target], true);
   if (listed.status === 0) {
     try {
@@ -43,7 +57,9 @@ function secretNames(): string[] {
 const build = spawnSync("pnpm", ["exec", "vite", "build"], { stdio: "inherit" });
 if (build.status !== 0) process.exit(build.status ?? 1);
 
-const names = secretNames();
+const name = workerName();
+console.log(`Deploying to the Worker "${name}"`);
+const names = secretNames(name);
 const secrets: Record<string, string> = {};
 let madePassword: string | null = null;
 
@@ -59,7 +75,7 @@ console.log(made.length ? `Deploying with new secrets: ${made.join(", ")}` : "De
 let dir: string | null = null;
 const args = ["deploy", ...passthrough];
 if (made.length) {
-  dir = mkdtempSync(join(tmpdir(), "podcast-proxy-"));
+  dir = mkdtempSync(join(tmpdir(), "subcast-"));
   const file = join(dir, "secrets.json");
   writeFileSync(file, JSON.stringify(secrets), { mode: 0o600 });
   args.push("--secrets-file", file);

@@ -1,8 +1,8 @@
 {
-  "name": "podcast-proxy",
+  "name": "subcast",
   "private": true,
   "type": "module",
-  "description": "Private RSS feeds of your subscriber podcasts, for Apple Podcasts and any other podcast app, running on your own Cloudflare account.",
+  "description": "The podcasts you pay for, in the podcast app you already use: private feeds of your subscriber podcasts on your own Cloudflare account.",
   "packageManager": "pnpm@10.34.9",
   "engines": {
     "node": ">=22.18"
@@ -53,5 +53,6 @@
     "vite": "^8.3.8",
     "vitest": "^5.1.0",
     "wrangler": "4.164.0"
-  }
+  },
+  "license": "MIT"
 }

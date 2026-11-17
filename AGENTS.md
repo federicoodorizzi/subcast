@@ -1,4 +1,4 @@
-# Podcast Proxy
+# Subcast
 
 A Cloudflare Worker that turns subscriber podcasts into private RSS feeds. See README.md.
 

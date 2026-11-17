@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { EyeIcon, EyeOffIcon, PodcastIcon, TriangleAlertIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, TriangleAlertIcon } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,11 +12,9 @@ import { api } from "@/lib/api";
 function Centered({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-4 py-[calc(env(safe-area-inset-top)+2rem)]">
-      <div className="flex items-center gap-2 font-semibold tracking-tight">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <PodcastIcon className="size-4" />
-        </span>
-        Podcast Proxy
+      <div className="flex items-center gap-2.5 text-lg font-semibold tracking-tight">
+        <Logo className="size-9" />
+        Subcast
       </div>
       <div className="w-full max-w-sm">{children}</div>
     </div>

@@ -1,13 +1,20 @@
-# Podcast Proxy
+<p align="center"><img src="public/icon.svg" width="96" height="96" alt=""></p>
 
-Private RSS feeds of the podcasts you subscribe to, for Apple Podcasts or any other podcast app.
+<h1 align="center">Subcast</h1>
+
+<p align="center">
+  The podcasts you pay for, in the podcast app you already use.<br>
+  Private feeds of your subscriber podcasts, on your own Cloudflare account.
+</p>
+
+<p align="center">
+  <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/federicoodorizzi/subcast"><img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare"></a>
+</p>
+
+Some publishers keep their subscriber podcasts inside their own apps or websites. Subcast signs in
+with your subscription, checks for new episodes every 30 minutes, and gives you a private feed
+address for each show. Add that address to Apple Podcasts, Overcast or any other podcast app.
 It runs on your own Cloudflare account, usually on the free plan.
-
-Some publishers put their subscriber podcasts only in their own apps or on their websites. Podcast
-Proxy signs in to your subscription, checks for new episodes every 30 minutes, and gives you a
-private feed address for each show. Paste that address into Apple Podcasts with **Follow a Show by URL**.
-
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/federicoodorizzi/podcast-proxy)
 
 ## Supported publishers
 
@@ -57,8 +64,8 @@ Adding a publisher is one file: see [Adding a publisher](#adding-a-publisher).
 - **Logs never include a token.** Cloudflare's invocation logs record every request URL, so this
   Worker turns them off (`observability.logs.invocation_logs: false`). Its own log lines never
   contain a token.
-- Personal use only. Most subscriptions, Internazionale's included, allow personal use only and no
-  redistribution. Don't share your feeds.
+- **Personal use only.** Most subscriptions, Internazionale's and Il Post's included, allow personal
+  use only and no redistribution. Don't share your feeds.
 
 ## Deploy
 
@@ -66,12 +73,12 @@ Adding a publisher is one file: see [Adding a publisher](#adding-a-publisher).
 
 1. Click **Deploy to Cloudflare** above. Cloudflare copies this repository to your GitHub or
    GitLab account, creates the Worker and its D1 database, and asks for an **admin password**.
-2. Once it has deployed, open the Worker's address (`https://podcast-proxy.<you>.workers.dev`) and
+2. Once it has deployed, open the Worker's address (`https://subcast.<you>.workers.dev`) and
    sign in with that password.
-3. Choose **Add an account → Internazionale**, enter your subscriber email and password, tick the
-   shows you want, and choose **Make feeds**.
-4. Copy a feed address. In Apple Podcasts: **Library → ⋯ → Follow a Show by URL** (on a Mac:
-   **File → Follow a Show by URL**).
+3. Connect a publisher, sign in with your subscriber email and password, tick the shows you want,
+   and choose **Add**.
+4. Tap a show, then **Open in Apple Podcasts**. Or copy its address and, in Apple Podcasts, choose
+   **Library → ⋯ → Follow a Show by URL** (on a Mac: **File → Follow a Show by URL**).
 
 Every later push to your copy deploys it again. The build runs `pnpm run deploy`
 ([`scripts/deploy.ts`](scripts/deploy.ts)), which creates `APP_SECRET` on the first deploy and
@@ -96,6 +103,22 @@ If you leave out `ADMIN_PASSWORD`, the script generates one and prints it once.
 In the dashboard, open the Worker's **Settings → Domains & Routes → Add → Custom domain**, and
 enter a hostname on a zone in your account, such as `podcasts.example.com`. Feed addresses follow
 whichever address you use to open the admin pages.
+
+### Your own settings
+
+To deploy from your machine with settings of your own, create `wrangler.local.json`, which git
+ignores. Its top-level fields replace the ones in `wrangler.jsonc`:
+
+```json
+{
+  "name": "my-subcast",
+  "d1_databases": [{ "binding": "DB", "database_name": "my-subcast" }],
+  "routes": [{ "pattern": "podcasts.example.com", "custom_domain": true }]
+}
+```
+
+Keep a Worker's name once it has deployed. Its `APP_SECRET` belongs to that Worker, and a new name
+means a new Worker with a new secret, which can't read the credentials the old one saved.
 
 ## Develop
 
@@ -136,3 +159,17 @@ timeout, and lets the tests swap the publisher out.
 
 The free Workers plan covers this: one feed fetch per show every 30 minutes, plus whatever your
 podcast apps request. A D1 database on the free plan holds up to 500 MB, which is years of episodes.
+
+## Disclaimer
+
+Subcast is an independent project. It isn't affiliated with, endorsed by or connected to
+Internazionale, Il Post, Apple or any other publisher or app it works with. Their names are used only
+to say what Subcast works with, and they remain their owners' trademarks.
+
+Subcast is for listening to podcasts you already pay for, using your own account. You're responsible
+for following your subscription's terms. Publishers can change their sites and apps at any time,
+which can stop a provider working until it's updated.
+
+## License
+
+[MIT](LICENSE)
